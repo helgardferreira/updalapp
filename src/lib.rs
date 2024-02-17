@@ -1,0 +1,47 @@
+use std::{fs, process::Command};
+
+use dirs::home_dir;
+
+pub fn get_current_theme() -> Result<String, &'static str> {
+    let output = Command::new("defaults")
+        .args(["read", "-g", "AppleInterfaceStyle"])
+        .output();
+
+    match output {
+        Ok(output) => {
+            if output.status.success() {
+                Ok(String::from("Dark"))
+            } else {
+                // Assuming light mode if the command fails, as it does not exist in light mode
+                Ok(String::from("Light"))
+            }
+        }
+        Err(_) => Err("Failed to execute command"),
+    }
+}
+
+pub fn update_alacritty_config(theme: &str) -> Result<(), std::io::Error> {
+    let mut path = home_dir().unwrap();
+    path.push(".config/alacritty/alacritty.toml");
+
+    let content = fs::read_to_string(path.clone())?;
+
+    let new_content = content
+        .lines()
+        .map(|line| {
+            if line.starts_with("import = [\"~/.config/alacritty/themes/themes/catppuccin") {
+                if theme == "Dark" {
+                    "import = [\"~/.config/alacritty/themes/themes/catppuccin_macchiato.toml\"]"
+                } else {
+                    "import = [\"~/.config/alacritty/themes/themes/catppuccin_latte.toml\"]"
+                }
+            } else {
+                line
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    fs::write(path, new_content)?;
+    Ok(())
+}
