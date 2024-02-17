@@ -2,7 +2,13 @@ use std::{fs, process::Command};
 
 use dirs::home_dir;
 
-pub fn get_current_theme() -> Result<String, &'static str> {
+#[derive(PartialEq, Clone, Copy)]
+pub enum Theme {
+    Dark,
+    Light,
+}
+
+pub fn get_current_theme() -> Result<Theme, &'static str> {
     let output = Command::new("defaults")
         .args(["read", "-g", "AppleInterfaceStyle"])
         .output();
@@ -10,17 +16,17 @@ pub fn get_current_theme() -> Result<String, &'static str> {
     match output {
         Ok(output) => {
             if output.status.success() {
-                Ok(String::from("Dark"))
+                Ok(Theme::Dark)
             } else {
                 // Assuming light mode if the command fails, as it does not exist in light mode
-                Ok(String::from("Light"))
+                Ok(Theme::Light)
             }
         }
         Err(_) => Err("Failed to execute command"),
     }
 }
 
-pub fn update_alacritty_config(theme: &str) -> Result<(), std::io::Error> {
+pub fn update_alacritty_config(theme: Theme) -> Result<(), std::io::Error> {
     let mut path = home_dir().unwrap();
     path.push(".config/alacritty/alacritty.toml");
 
@@ -30,10 +36,13 @@ pub fn update_alacritty_config(theme: &str) -> Result<(), std::io::Error> {
         .lines()
         .map(|line| {
             if line.starts_with("import = [\"~/.config/alacritty/themes/themes/catppuccin") {
-                if theme == "Dark" {
-                    "import = [\"~/.config/alacritty/themes/themes/catppuccin_macchiato.toml\"]"
-                } else {
-                    "import = [\"~/.config/alacritty/themes/themes/catppuccin_latte.toml\"]"
+                match theme {
+                    Theme::Dark => {
+                        "import = [\"~/.config/alacritty/themes/themes/catppuccin_macchiato.toml\"]"
+                    }
+                    Theme::Light => {
+                        "import = [\"~/.config/alacritty/themes/themes/catppuccin_latte.toml\"]"
+                    }
                 }
             } else {
                 line
