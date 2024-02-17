@@ -13,7 +13,7 @@ fn main() {
     });
 
     loop {
-        thread::sleep(Duration::from_secs(1)); // Check every 5 seconds
+        thread::sleep(Duration::from_secs(1)); // Check every 1 second
 
         match get_current_theme() {
             Ok(current_theme) => {
