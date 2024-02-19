@@ -5,7 +5,7 @@
     <key>Label</key>
     <string>com.helgardferreira.updalapp</string>
     <key>Program</key>
-    <string>/Users/helgardferreira/Documents/Programming/rust/updalapp/updalapp</string>
+    <string>/Users/helgardferreira/.local/bin/updalapp</string>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
